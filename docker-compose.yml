@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  api:
+    build: .
+    container_name: esim-global-api
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - WORDPRESS_URL=${WORDPRESS_URL}
+      - API_KEY=${API_KEY}
+      - REFRESH_INTERVAL=${REFRESH_INTERVAL}
+      - FASTAPI_API_KEY=${FASTAPI_API_KEY}
+      - GUNICORN_WORKERS=4
+      - GUNICORN_LOG_LEVEL=info
+    volumes:
+      - ./:/app
+    networks:
+      - esim-network
+
+  nginx:
+    image: nginx:latest
+    container_name: esim-global-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - api
+    networks:
+      - esim-network
+
+networks:
+  esim-network:
+    driver: bridge 
